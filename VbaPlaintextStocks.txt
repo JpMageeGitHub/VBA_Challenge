@@ -1,0 +1,130 @@
+                               
+                              Sub RealStonks()
+
+Dim LastRow As Long
+Dim Current As Worksheet
+ 
+
+
+For Each Current In Worksheets
+
+LastRow = Current.Cells(Rows.Count, 1).End(xlUp).Row
+
+
+  ' Set an initial variable for holding the stock name
+  Dim Stock_Name As String
+  Dim YearOpen As Double
+  Dim YearClose As Double
+  Dim YearChange As Double
+  Dim PercChange As Double
+  Dim MaxPerc As Double
+  Dim MaxVolume As Double
+  Dim MinPerc As Double
+  
+  
+  ' Set an initial variable for holding the total per stock
+  Dim Volume_Total As Double
+  Volume_Total = 0
+
+  ' Keep track of the location for each stock in the summary table
+  Dim Summary_Table_Row As Long
+  Summary_Table_Row = 2
+  
+     Current.Range("I1").Value = "Stock Name"
+     Current.Range("J1").Value = "Yearly Change"
+     Current.Range("K1").Value = "Percent Change"
+     Current.Range("L1").Value = "Volume"
+     
+     
+  ' Loop through all stocks
+  For I = 2 To LastRow
+  
+
+    ' Check if we are still within the same stock, if it is not...
+    If Current.Cells(I + 1, 1).Value <> Current.Cells(I, 1).Value Then
+
+      ' Set the stock name
+      Stock_Name = Current.Cells(I, 1).Value
+      
+      ' Add to the Year Open and Close totals
+      
+      YearOpen = YearOpen + Current.Cells(I, 3).Value
+      YearClose = YearClose + Current.Cells(I, 6).Value
+      
+
+      ' Add to the volume Total
+      Volume_Total = Volume_Total + Current.Cells(I, 7).Value
+
+      ' Print the Stock Name in the Summary Table
+      Current.Range("I" & Summary_Table_Row).Value = Stock_Name
+      
+      YearChange = YearOpen - YearClose
+      PercChange = (YearOpen - YearClose) / (YearOpen)
+      
+           If YearChange <= 0 Then
+           Current.Range("J" & Summary_Table_Row).Interior.ColorIndex = 3
+           Current.Range("K" & Summary_Table_Row).Interior.ColorIndex = 3
+           
+           ElseIf YearChange > 0 Then
+           Current.Range("J" & Summary_Table_Row).Interior.ColorIndex = 4
+           Current.Range("K" & Summary_Table_Row).Interior.ColorIndex = 4
+           End If
+
+      ' Print the Volume to the Summary Table
+      Current.Range("L" & Summary_Table_Row).Value = Volume_Total
+      Current.Range("J" & Summary_Table_Row).Value = YearChange
+      Current.Range("K" & Summary_Table_Row).Value = PercChange
+      
+      
+      ' Calculate the largest % change, smalles % change, and max volume
+      
+      
+      MaxVolume = WorksheetFunction.Max(Current.Range("L:L"))
+      MinPerc = WorksheetFunction.Min(Current.Range("K:K"))
+      MaxPerc = WorksheetFunction.Max(Current.Range("K:K"))
+      
+     ' Print the headers for the summary table and find the associated stock tickers
+     
+      Current.Range("O1").Value = "Value"
+      Current.Range("P1").Value = "Ticker"
+      Current.Range("N2").Value = "Max Stock Volume"
+      Current.Range("N3").Value = "Min Percent Change"
+      Current.Range("N4").Value = "Max Percent Change"
+      
+      Current.Range("O2").Value = MaxVolume
+      Current.Range("O3") = MinPerc
+      Current.Range("O4") = MaxPerc
+      
+      Current.Range("P2").Value = "=xlookup(O2,L:L,I:I)"
+      Current.Range("P3").Value = "=xlookup(O3,k:k,I:I)"
+      Current.Range("P4").Value = "=xlookup(O4,k:k,I:I)"
+    
+
+           
+      ' Add one to the summary table row
+      Summary_Table_Row = Summary_Table_Row + 1
+      
+      ' Reset the Volume Total
+      Volume_Total = 0
+      YearOpen = 0
+      YearClose = 0
+
+    ' If the cell immediately following a row is the same brand...
+    Else
+
+      ' Add to the Brand Total
+      Volume_Total = Volume_Total + Current.Cells(I, 7).Value
+
+    End If
+
+  Next I
+  
+
+Next Current
+
+
+
+
+End Sub
+
+
